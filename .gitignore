@@ -1,0 +1,51 @@
+# Logs
+*.log
+logs/
+/var/log/
+
+# Vault data
+/opt/nia-vault/storage/*
+/opt/nia-vault/keys/*
+*.encrypted
+
+# Docker
+.dockerignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.key
+*.pem
+*.crt
+secrets/
+.env
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+dist/
+build/
+*.tar.gz
+*.zip
