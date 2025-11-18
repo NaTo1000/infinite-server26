@@ -6,8 +6,31 @@
 ![Security](https://img.shields.io/badge/security-MAXIMUM-red)
 ![Mercy](https://img.shields.io/badge/mercy-DISABLED-red)
 ![Status](https://img.shields.io/badge/status-FORTRESS-green)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![Deployment](https://img.shields.io/badge/deployment-automated-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 **Built by: NaTo1000** | **Codename: FORTRESS**
+
+## 🚀 Quick Deploy
+
+Deploy the entire fortress with one command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NaTo1000/infinite-server26/main/quick-deploy.sh | bash
+```
+
+Or manually:
+
+```bash
+git clone https://github.com/NaTo1000/infinite-server26.git
+cd infinite-server26
+./quick-deploy.sh
+```
+
+**Access:** `http://localhost:8000` (Fortress) | `http://localhost:8090` (Rancher)
+
+📖 **[Complete Deployment Guide](DEPLOYMENT.md)** | 🐳 **[Docker Build Guide](BUILD_AND_PUSH.md)**
 
 ---
 
