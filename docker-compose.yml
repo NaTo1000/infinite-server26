@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # Infinite Server26 - Main Fortress Container
+  fortress:
+    image: nato1000/infinite-server26:latest
+    container_name: infinite-fortress
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - INFINITE_VERSION=26.1
+      - NAYDOE_MODE=autonomous
+      - JESSICAI_MODE=huntress
+      - NAI_GAIL_ENABLED=true
+      - NIA_VAULT_ACTIVE=true
+      - SECURITY_LEVEL=maximum
+      - MERCY_MODE=disabled
+    volumes:
+      - fortress-data:/root/fortress
+      - vault-storage:/opt/nia-vault/storage
+      - logs:/var/log
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+      - "8443:8443"
+      - "6443:6443"
+      - "2376:2376"
+      - "2377:2377"
+      - "5000:5000"
+      - "8000:8000"
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Rancher - Container Management Dashboard
+  rancher:
+    image: rancher/rancher:latest
+    container_name: rancher-dashboard
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "8090:80"
+      - "8444:443"
+    volumes:
+      - rancher-data:/var/lib/rancher
+    environment:
+      - CATTLE_BOOTSTRAP_PASSWORD=${RANCHER_PASSWORD:-admin}
+
+volumes:
+  fortress-data:
+    driver: local
+  vault-storage:
+    driver: local
+  logs:
+    driver: local
+  rancher-data:
+    driver: local
+
+networks:
+  default:
+    name: infinite-network
+    driver: bridge

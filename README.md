@@ -6,8 +6,53 @@
 ![Security](https://img.shields.io/badge/security-MAXIMUM-red)
 ![Mercy](https://img.shields.io/badge/mercy-DISABLED-red)
 ![Status](https://img.shields.io/badge/status-FORTRESS-green)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![Deployment](https://img.shields.io/badge/deployment-automated-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 **Built by: NaTo1000** | **Codename: FORTRESS**
+
+## 🚀 Quick Deploy
+
+### One-Line Installation (Recommended)
+
+Install everything automatically with root access:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NaTo1000/infinite-server26/main/install.sh | sudo bash
+```
+
+This will:
+- ✅ Install Docker & Docker Compose
+- ✅ Clone repository to `/opt/infinite-server26`
+- ✅ Generate secure passwords
+- ✅ Deploy all services
+- ✅ Configure auto-start
+
+### Quick Deploy (Fully Automated)
+
+If you already have Docker installed:
+
+```bash
+git clone https://github.com/NaTo1000/infinite-server26.git
+cd infinite-server26
+./quick-deploy.sh
+```
+
+**Fully automated** - no prompts, auto-generates secure passwords, continues even with warnings.
+
+### Docker Compose (Advanced)
+
+```bash
+git clone https://github.com/NaTo1000/infinite-server26.git
+cd infinite-server26
+cp .env.example .env
+docker-compose up -d
+```
+
+**Access:** `http://localhost:8000` (Fortress) | `http://localhost:8090` (Rancher)
+
+📖 **[Complete Deployment Guide](DEPLOYMENT.md)** | 🐳 **[Docker Build Guide](BUILD_AND_PUSH.md)** | 🤝 **[Contributing](CONTRIBUTING.md)**
 
 ---
 

@@ -9,7 +9,7 @@ logs/
 *.encrypted
 
 # Docker
-.dockerignore
+# .dockerignore should be version controlled
 
 # Python
 __pycache__/

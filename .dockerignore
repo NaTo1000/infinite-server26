@@ -1,0 +1,82 @@
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+BUILD_AND_PUSH.md
+DEPLOYMENT.md
+PAYMENT_SYSTEM.md
+PIPELINE_SYSTEM.md
+LICENSE
+
+# Docker
+docker-compose.yml
+.dockerignore
+Dockerfile
+
+# Scripts (not needed in image)
+quick-deploy.sh
+verify-deployment.sh
+deployment-info-*.txt
+
+# Environment
+.env
+.env.example
+
+# Logs
+*.log
+logs/
+/var/log/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Secrets
+*.key
+*.pem
+*.crt
+secrets/
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# Systemd (not needed in container)
+systemd/
+
+# Backups
+*.bak
+*.backup

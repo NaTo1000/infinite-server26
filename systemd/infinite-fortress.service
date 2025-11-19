@@ -1,0 +1,37 @@
+[Unit]
+Description=Infinite Server26 Fortress - Autonomous AI Security Platform
+Documentation=https://github.com/NaTo1000/infinite-server26
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/infinite-server26
+EnvironmentFile=-/opt/infinite-server26/.env
+
+# Start fortress
+ExecStartPre=-/usr/local/bin/docker-compose pull
+ExecStart=/usr/local/bin/docker-compose up -d
+
+# Stop fortress
+ExecStop=/usr/local/bin/docker-compose down
+
+# Restart on failure
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=300
+TimeoutStopSec=120
+
+# Security
+NoNewPrivileges=false
+PrivateTmp=yes
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=infinite-fortress
+
+[Install]
+WantedBy=multi-user.target
