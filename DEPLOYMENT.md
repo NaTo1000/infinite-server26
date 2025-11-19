@@ -68,32 +68,30 @@ docker-compose --version
 
 ---
 
-## Quick Deploy (Recommended)
+## Quick Deploy (Recommended - Fully Automated)
 
-The fastest way to get started:
+The fastest way to get started with zero interaction:
 
 ```bash
 # Clone repository
 git clone https://github.com/NaTo1000/infinite-server26.git
 cd infinite-server26
 
-# Copy and configure environment
-cp .env.example .env
-nano .env  # Edit with your settings
-
-# Deploy with docker-compose
-docker-compose up -d
-
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f fortress
+# Deploy with automatic configuration
+./quick-deploy.sh
 ```
+
+**Fully Automated Features:**
+- ✅ Automatically generates secure random passwords
+- ✅ No user prompts or interaction required
+- ✅ Continues deployment even with warnings
+- ✅ Displays generated credentials at the end
 
 **Access Points:**
 - Fortress Dashboard: http://localhost:8000
 - Rancher Dashboard: http://localhost:8090
+
+**Note:** The script will display generated passwords. Save them securely!
 
 ---
 

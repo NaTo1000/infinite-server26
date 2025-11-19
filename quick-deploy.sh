@@ -85,14 +85,25 @@ if [ ! -f .env ]; then
     if [ -f .env.example ]; then
         cp .env.example .env
         print_success "Created .env from .env.example"
-        print_warning "Please edit .env file with your configuration before proceeding!"
+        
+        # Auto-generate secure passwords for fully automated deployment
+        print_status "Generating secure random passwords..."
+        RANCHER_PASS=$(openssl rand -base64 16 2>/dev/null || echo "AdminPass$(date +%s)")
+        VAULT_KEY=$(openssl rand -base64 32 2>/dev/null | cut -c1-32 || echo "VaultKey$(date +%s)1234567890123")
+        MESH_PASS=$(openssl rand -base64 16 2>/dev/null || echo "MeshPass$(date +%s)")
+        
+        # Update .env with generated passwords
+        sed -i "s/YourSecurePasswordHere/$RANCHER_PASS/" .env 2>/dev/null || true
+        sed -i "s/your_secure_vault_master_key_here/$VAULT_KEY/" .env 2>/dev/null || true
+        sed -i "s/your_mesh_password_here/$MESH_PASS/" .env 2>/dev/null || true
+        
+        print_success "Environment configured with auto-generated secure passwords"
         echo ""
-        echo "Important settings to configure:"
-        echo "  - RANCHER_PASSWORD"
-        echo "  - VAULT_MASTER_KEY"
-        echo "  - MESH_NETWORK_PASSWORD"
+        echo "Generated credentials (save these):"
+        echo "  RANCHER_PASSWORD: $RANCHER_PASS"
+        echo "  VAULT_MASTER_KEY: $VAULT_KEY"
+        echo "  MESH_NETWORK_PASSWORD: $MESH_PASS"
         echo ""
-        read -p "Press Enter after editing .env to continue, or Ctrl+C to exit..."
     else
         print_error ".env.example not found!"
         exit 1
@@ -106,11 +117,7 @@ print_status "Checking disk space..."
 AVAILABLE_SPACE=$(df -BG . | awk 'NR==2 {print $4}' | sed 's/G//')
 if [ "$AVAILABLE_SPACE" -lt 20 ]; then
     print_warning "Low disk space: ${AVAILABLE_SPACE}GB available (20GB+ recommended)"
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
+    print_warning "Continuing with deployment anyway (fully automated mode)"
 else
     print_success "Sufficient disk space: ${AVAILABLE_SPACE}GB available"
 fi

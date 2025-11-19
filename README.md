@@ -29,7 +29,7 @@ This will:
 - ✅ Deploy all services
 - ✅ Configure auto-start
 
-### Quick Deploy (Manual)
+### Quick Deploy (Fully Automated)
 
 If you already have Docker installed:
 
@@ -38,6 +38,8 @@ git clone https://github.com/NaTo1000/infinite-server26.git
 cd infinite-server26
 ./quick-deploy.sh
 ```
+
+**Fully automated** - no prompts, auto-generates secure passwords, continues even with warnings.
 
 ### Docker Compose (Advanced)
 
