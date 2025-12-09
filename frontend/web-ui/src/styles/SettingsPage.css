@@ -1,0 +1,189 @@
+.settings-page h2 {
+  font-size: 28px;
+  color: #ffffff;
+  margin-bottom: 32px;
+}
+
+.settings-section {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.settings-section h3 {
+  font-size: 20px;
+  color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #1e2845;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-info {
+  flex: 1;
+}
+
+.setting-label {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.setting-description {
+  font-size: 14px;
+  color: #8892b0;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 28px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #1e2845;
+  transition: 0.4s;
+  border-radius: 28px;
+  border: 1px solid #2e3855;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #00ff41;
+  border-color: #00ff41;
+}
+
+input:checked + .slider:before {
+  transform: translateX(28px);
+}
+
+.setting-input {
+  padding: 10px 16px;
+  background: #1a2238;
+  border: 1px solid #2e3855;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  min-width: 100px;
+}
+
+.setting-input:focus {
+  outline: none;
+  border-color: #00ff41;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-section .info-item .info-label {
+  font-size: 14px;
+  color: #8892b0;
+}
+
+.settings-section .info-item .info-value {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.settings-actions .btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-actions .btn-primary {
+  background: #00ff41;
+  color: #0a0e27;
+}
+
+.settings-actions .btn-primary:hover {
+  background: #00cc33;
+  transform: translateY(-2px);
+}
+
+.settings-actions .btn-secondary {
+  background: #1e2845;
+  color: #ffffff;
+  border: 1px solid #2e3855;
+}
+
+.settings-actions .btn-secondary:hover {
+  background: #2e3855;
+}
+
+@media (max-width: 768px) {
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .settings-actions {
+    flex-direction: column;
+  }
+  
+  .settings-actions .btn {
+    width: 100%;
+  }
+}

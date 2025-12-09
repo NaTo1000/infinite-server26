@@ -1,0 +1,12 @@
+#!/bin/sh
+
+##############################################################################
+# Gradle startup script for UN*X
+##############################################################################
+
+# Gradle wrapper script
+
+GRADLE_VERSION=8.0
+GRADLE_OPTS=""
+
+exec java $GRADLE_OPTS -jar gradle-wrapper.jar "$@"
