@@ -50,15 +50,75 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-**Access:** `http://localhost:8000` (Fortress) | `http://localhost:8090` (Rancher)
+**Access:** `http://localhost:8000` (Fortress) | `http://localhost:8090` (Rancher) | `http://localhost:3000` (Web UI)
 
-📖 **[Complete Deployment Guide](DEPLOYMENT.md)** | 🐳 **[Docker Build Guide](BUILD_AND_PUSH.md)** | 🤝 **[Contributing](CONTRIBUTING.md)**
+📖 **[Complete Deployment Guide](DEPLOYMENT.md)** | 🐳 **[Docker Build Guide](BUILD_AND_PUSH.md)** | 🖥️ **[UI Workflow Documentation](UI_WORKFLOW_DOCUMENTATION.md)** | 🤝 **[Contributing](CONTRIBUTING.md)**
+
+### 🎨 UI Workflow & Build Process
+
+**NEW:** Comprehensive UI workflow with multiple frontend implementations!
+
+```bash
+# Master build script - build everything
+./run.sh all
+
+# Or build specific components
+./run.sh docker      # Docker images
+./run.sh web         # Web UI
+./run.sh swiftui     # macOS app
+./run.sh android     # Android app
+./run.sh test        # Run tests
+```
+
+**Available Interfaces:**
+- 🌐 **Web Dashboard** (React): Modern browser-based control center
+- 🖥️ **Desktop App** (SwiftUI): Native macOS application
+- 📱 **Mobile App** (Android): Native Android application
+
+See **[UI_WORKFLOW_DOCUMENTATION.md](UI_WORKFLOW_DOCUMENTATION.md)** for complete details.
 
 ---
 
 ## 🎯 What is Infinite Server26?
 
 Infinite Server26 is the **ultimate autonomous security fortress** that combines enterprise-grade container orchestration, full Kali Linux pentesting suite, AI-powered security systems, mesh networking, and braided blockchain storage into one self-defending, self-healing platform.
+
+## 🖥️ User Interfaces
+
+Infinite Server26 provides **three comprehensive UI implementations** for complete system control:
+
+### 🌐 Web Dashboard (React)
+Modern, responsive browser-based interface featuring:
+- Real-time system monitoring with live metrics
+- AI systems control panel
+- Security threat visualization
+- Blockchain explorer
+- Container management
+- Dark theme optimized for security operations
+
+**Access:** `http://localhost:3000` | **Tech:** React 18, Material-UI, Recharts, WebSockets
+
+### 🖥️ Desktop Application (SwiftUI)
+Native macOS application providing:
+- Seamless macOS integration
+- Low resource footprint
+- Native performance
+- System status at a glance
+- Quick access to all features
+
+**Platform:** macOS 13.0+ | **Tech:** SwiftUI, Combine
+
+### 📱 Mobile Application (Android)
+Native Android app featuring:
+- Material Design 3 interface
+- On-the-go monitoring
+- Real-time alerts
+- Mobile-optimized controls
+- Offline capability
+
+**Platform:** Android 8.0+ | **Tech:** Kotlin, Jetpack Compose
+
+**See [UI_WORKFLOW_DOCUMENTATION.md](UI_WORKFLOW_DOCUMENTATION.md) for setup, development, and build instructions.**
 
 ## ⚡ Key Features
 
