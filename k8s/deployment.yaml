@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infinite-server26
+  namespace: infinite-server26
+  labels:
+    app: infinite-server26
+    version: "26.1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: infinite-server26
+  template:
+    metadata:
+      labels:
+        app: infinite-server26
+        version: "26.1"
+    spec:
+      containers:
+      - name: fortress
+        image: nato1000/infinite-server26:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        - containerPort: 8000
+          name: api
+        - containerPort: 8080
+          name: dashboard
+        env:
+        - name: INFINITE_VERSION
+          value: "26.1"
+        - name: NAYDOE_MODE
+          value: "autonomous"
+        - name: JESSICAI_MODE
+          value: "huntress"
+        - name: NAI_GAIL_ENABLED
+          value: "true"
+        - name: NIA_VAULT_ACTIVE
+          value: "true"
+        - name: SECURITY_LEVEL
+          value: "maximum"
+        - name: MERCY_MODE
+          value: "disabled"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: fortress-data
+          mountPath: /root/fortress
+        - name: vault-storage
+          mountPath: /opt/nia-vault/storage
+        - name: logs
+          mountPath: /var/log
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: fortress-data
+        persistentVolumeClaim:
+          claimName: fortress-data-pvc
+      - name: vault-storage
+        persistentVolumeClaim:
+          claimName: vault-storage-pvc
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-ui
+  namespace: infinite-server26
+  labels:
+    app: web-ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-ui
+  template:
+    metadata:
+      labels:
+        app: web-ui
+    spec:
+      containers:
+      - name: web-ui
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: web-ui-content
+          mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: web-ui-content
+        configMap:
+          name: web-ui-config

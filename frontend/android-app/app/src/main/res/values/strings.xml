@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Infinite Server26</string>
+    <string name="fortress_mode">FORTRESS MODE ACTIVE</string>
+    <string name="cpu_usage">CPU Usage</string>
+    <string name="memory_usage">Memory Usage</string>
+    <string name="threats_blocked">Threats Blocked</string>
+    <string name="active_containers">Active Containers</string>
+</resources>

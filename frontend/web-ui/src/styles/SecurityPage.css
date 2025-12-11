@@ -1,0 +1,181 @@
+.security-page h2 {
+  font-size: 28px;
+  color: #ffffff;
+  margin-bottom: 32px;
+}
+
+.security-overview {
+  margin-bottom: 32px;
+}
+
+.security-status {
+  background: linear-gradient(135deg, #141a2e 0%, #1a2238 100%);
+  border: 2px solid #00ff41;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.status-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.security-status h3 {
+  font-size: 24px;
+  color: #00ff41;
+  margin-bottom: 8px;
+}
+
+.security-status p {
+  font-size: 16px;
+  color: #8892b0;
+}
+
+.security-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.security-card {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.security-card h3 {
+  font-size: 20px;
+  color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.shield-status {
+  display: flex;
+  gap: 24px;
+}
+
+.shield-visual {
+  flex: 0 0 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shield-dome {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 65, 0.2) 0%, transparent 70%);
+  border: 2px solid #00ff41;
+  animation: shield-pulse 2s infinite;
+  position: relative;
+}
+
+@keyframes shield-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.8);
+  }
+}
+
+.shield-info {
+  flex: 1;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #1e2845;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item .label {
+  font-size: 14px;
+  color: #8892b0;
+}
+
+.info-item .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.info-item .value.online {
+  color: #00ff41;
+}
+
+.firewall-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.threat-log {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.threat-log h3 {
+  font-size: 20px;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.log-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  padding: 12px;
+  background: #1a2238;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.log-entry.success {
+  border-left-color: #00ff41;
+}
+
+.log-entry.info {
+  border-left-color: #00aaff;
+}
+
+.log-entry.warning {
+  border-left-color: #ffaa00;
+}
+
+.log-time {
+  color: #8892b0;
+  margin-right: 12px;
+}
+
+.log-message {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .security-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .shield-status {
+    flex-direction: column;
+  }
+}

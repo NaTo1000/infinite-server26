@@ -1,0 +1,133 @@
+.ai-systems-page h2 {
+  font-size: 28px;
+  color: #ffffff;
+  margin-bottom: 32px;
+}
+
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.ai-card {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 255, 65, 0.15);
+}
+
+.ai-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #1a2238;
+  border-bottom: 1px solid #1e2845;
+}
+
+.ai-card-header h3 {
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.online {
+  background: rgba(0, 255, 65, 0.1);
+  color: #00ff41;
+  border: 1px solid #00ff41;
+}
+
+.ai-card-body {
+  padding: 20px;
+}
+
+.ai-info {
+  margin-bottom: 20px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #1e2845;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .label {
+  font-size: 14px;
+  color: #8892b0;
+}
+
+.info-row .value {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ai-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #00ff41;
+  color: #0a0e27;
+}
+
+.btn-primary:hover {
+  background: #00cc33;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #1e2845;
+  color: #ffffff;
+  border: 1px solid #2e3855;
+}
+
+.btn-secondary:hover {
+  background: #2e3855;
+}
+
+.btn-danger {
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff4444;
+  border: 1px solid #ff4444;
+}
+
+.btn-danger:hover {
+  background: rgba(255, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .ai-grid {
+    grid-template-columns: 1fr;
+  }
+}

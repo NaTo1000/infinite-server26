@@ -53,6 +53,23 @@ services:
     environment:
       - CATTLE_BOOTSTRAP_PASSWORD=${RANCHER_PASSWORD:-admin}
 
+  # Web UI - React Dashboard
+  web-ui:
+    build:
+      context: ./frontend/web-ui
+      dockerfile: Dockerfile
+    container_name: web-ui
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - fortress
+    networks:
+      - infinite-network
+
 volumes:
   fortress-data:
     driver: local

@@ -1,0 +1,20 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+		productName = InfiniteServer26;
+		buildSettings = {
+			PRODUCT_NAME = "Infinite Server26";
+			PRODUCT_BUNDLE_IDENTIFIER = com.nato1000.infiniteserver26;
+			MARKETING_VERSION = 26.1;
+			CURRENT_PROJECT_VERSION = 1;
+			MACOSX_DEPLOYMENT_TARGET = 13.0;
+			SWIFT_VERSION = 5.0;
+			ENABLE_PREVIEWS = YES;
+		};
+	};
+	rootObject = /* Project object */;
+}

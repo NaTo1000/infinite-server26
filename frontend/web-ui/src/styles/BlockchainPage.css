@@ -1,0 +1,169 @@
+.blockchain-page h2 {
+  font-size: 28px;
+  color: #ffffff;
+  margin-bottom: 32px;
+}
+
+.vault-status {
+  margin-bottom: 32px;
+}
+
+.vault-card {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.vault-card h3 {
+  font-size: 20px;
+  color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.chains-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: #1a2238;
+  border-radius: 8px;
+}
+
+.chain {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.chain-label {
+  font-size: 14px;
+  color: #8892b0;
+  min-width: 60px;
+}
+
+.chain-blocks {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.block {
+  width: 50px;
+  height: 40px;
+  background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+  border-radius: 4px;
+  animation: block-pulse 3s infinite;
+}
+
+.chain-1 .block {
+  animation-delay: 0s;
+}
+
+.chain-2 .block {
+  animation-delay: 0.5s;
+}
+
+.chain-3 .block {
+  animation-delay: 1s;
+}
+
+@keyframes block-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+  }
+}
+
+.blockchain-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.blockchain-metrics .metric-card {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.metric-label {
+  font-size: 14px;
+  color: #8892b0;
+  margin-bottom: 8px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00ff41;
+}
+
+.recent-transactions {
+  background: #141a2e;
+  border: 1px solid #1e2845;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.recent-transactions h3 {
+  font-size: 20px;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #1a2238;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.transaction-item:hover {
+  background: #1e2845;
+}
+
+.tx-hash {
+  color: #00ff41;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.tx-type {
+  color: #8892b0;
+  padding: 4px 12px;
+  background: #1e2845;
+  border-radius: 12px;
+}
+
+.tx-time {
+  color: #8892b0;
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .blockchain-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chain-blocks {
+    overflow-x: auto;
+  }
+}

@@ -49,3 +49,36 @@ dist/
 build/
 *.tar.gz
 *.zip
+
+# Frontend
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+.next/
+out/
+
+# Web UI
+frontend/web-ui/build/
+frontend/web-ui/.env.local
+
+# Android
+frontend/android-app/app/build/
+frontend/android-app/app/release/
+frontend/android-app/.gradle/
+frontend/android-app/local.properties
+*.apk
+*.aab
+
+# SwiftUI/Xcode
+frontend/desktop-swiftui/build/
+frontend/desktop-swiftui/*.xcodeproj/xcuserdata/
+frontend/desktop-swiftui/*.xcworkspace/xcuserdata/
+frontend/desktop-swiftui/DerivedData/
+*.xcarchive
+
+# Tests
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
