@@ -1,0 +1,59 @@
+# ╔═══════════════════════════════════════════════════════════════════╗
+# ║  INFINITE SERVER26 - VERSION 26.2 (REWRITTEN)                    ║
+# ║  Autonomous AI-Powered Security Fortress                         ║
+# ║  Built by: NaTo1000                                              ║
+# ╚═══════════════════════════════════════════════════════════════════╝
+
+FROM python:3.11-slim
+
+# Metadata
+LABEL maintainer="NaTo1000"
+LABEL description="Infinite Server26 v26.2 - Rewritten Architecture"
+LABEL version="26.2"
+LABEL github="https://github.com/NaTo1000/infinite-server26"
+
+# Environment
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    INFINITE_VERSION="26.2"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Core utilities
+    curl wget git nano \
+    # Network tools
+    net-tools iproute2 iputils-ping \
+    # Build tools
+    gcc g++ make \
+    # Security tools (lightweight selection)
+    nmap \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY common/ ./common/
+COPY core/ ./core/
+COPY config.yaml ./
+COPY server.py ./
+
+# Create necessary directories
+RUN mkdir -p logs data storage
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "import sys; sys.exit(0)"
+
+# Expose ports (if needed for future web interface)
+EXPOSE 8000
+
+# Run the server
+CMD ["python3", "server.py"]
