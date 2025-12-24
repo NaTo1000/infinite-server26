@@ -1,0 +1,78 @@
+# Infinite Server26 Configuration
+# Version: 26.2
+
+# General Settings
+server:
+  name: "Infinite Server26"
+  version: "26.2"
+  codename: "FORTRESS"
+  mode: "autonomous"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  dir: "./logs"
+  max_size_mb: 100
+  backup_count: 5
+  format: "%(asctime)s [%(name)s] %(levelname)s: %(message)s"
+
+# AI Systems
+ai:
+  naydoev1:
+    enabled: true
+    orchestration_interval: 60  # seconds
+    auto_heal: true
+    learning_mode: true
+  
+  jessicai:
+    enabled: true
+    security_level: "MAXIMUM"
+    mercy_mode: false
+    monitoring_interval: 5  # seconds
+    threat_threshold: 10
+
+# Security
+security:
+  nai_gail:
+    enabled: true
+    shield_radius: 100  # meters
+    scan_interval: 30  # seconds
+  
+  firewall:
+    enabled: true
+    default_policy: "deny"
+  
+  fail2ban:
+    enabled: true
+    max_retry: 3
+    ban_time: 3600  # seconds
+
+# Blockchain
+blockchain:
+  nia_vault:
+    enabled: true
+    chains: 3  # braided chains
+    difficulty: 4
+    storage_dir: "./storage/blockchain"
+    encryption: "AES-256-GCM"
+    auto_sync_interval: 300  # seconds
+
+# Paths (relative to project root)
+paths:
+  data: "./data"
+  logs: "./logs"
+  storage: "./storage"
+  plugins: "./plugins"
+  config: "."
+
+# Docker & Orchestration
+docker:
+  enabled: false
+  rancher:
+    enabled: false
+    port: 8080
+
+# Development
+development:
+  debug: false
+  test_mode: false
