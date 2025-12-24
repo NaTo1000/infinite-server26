@@ -33,6 +33,13 @@ ai:
 
 # Security
 security:
+  malicious_ports:
+    - "4444"
+    - "5555"
+    - "6666"
+    - "31337"
+    - "12345"
+  
   nai_gail:
     enabled: true
     shield_radius: 100  # meters

@@ -13,6 +13,7 @@ import time
 import json
 import hashlib
 import threading
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -291,9 +292,16 @@ class NiAVault(ComponentBase):
         """Start NiA_Vault"""
         self.start()
         
-        # Initialize vault with default password
+        # Initialize vault with password from config or environment
         if CRYPTO_AVAILABLE:
-            self.initialize_vault("default_password_change_me")
+            vault_password = self.config.get('blockchain.nia_vault.password') or \
+                           os.getenv('NIA_VAULT_PASSWORD')
+            
+            if vault_password:
+                self.initialize_vault(vault_password)
+            else:
+                self.logger.warning("⚠️  No vault password configured - encryption disabled")
+                self.logger.warning("Set NIA_VAULT_PASSWORD environment variable or add to config.yaml")
         
         # Start sync thread
         sync_thread = threading.Thread(target=self.sync_chains, daemon=True)

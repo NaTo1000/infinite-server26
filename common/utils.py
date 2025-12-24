@@ -41,7 +41,8 @@ class ConfigLoader:
                     return yaml.safe_load(f)
             else:
                 # Fallback to JSON if YAML not available
-                with open(self.config_path.replace('.yaml', '.json'), 'r') as f:
+                json_path = self.config_path.with_suffix('.json')
+                with open(json_path, 'r') as f:
                     return json.load(f)
         except Exception as e:
             print(f"Error loading config: {e}")

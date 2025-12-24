@@ -60,6 +60,11 @@ class NayDoeV1Orchestrator(ComponentBase):
     def _check_component(self, name: str) -> str:
         """Check if a component process is running"""
         try:
+            # Validate component name to prevent command injection
+            if not name.replace('_', '').isalnum():
+                self.logger.error(f"Invalid component name: {name}")
+                return 'unknown'
+            
             # Check if process exists
             result = subprocess.run(
                 ['pgrep', '-f', name],

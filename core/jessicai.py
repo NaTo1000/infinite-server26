@@ -109,8 +109,9 @@ class JessicAiHuntress(ComponentBase):
         if self.suspicious_activity[ip] > self.threat_threshold:
             return True
         
-        # Check malicious ports
-        malicious_ports = ['4444', '5555', '6666', '31337', '12345']
+        # Check malicious ports (configurable)
+        malicious_ports = self.config.get('security.malicious_ports', 
+                                         ['4444', '5555', '6666', '31337', '12345'])
         if port in malicious_ports:
             self.suspicious_activity[ip] += 1
             return True
