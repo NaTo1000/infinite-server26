@@ -5,6 +5,7 @@
 ║  INFINITE SERVER26 - MAIN SERVER                                 ║
 ║  Autonomous AI-Powered Security Fortress                         ║
 ║  Version: 26.2 | Built by: NaTo1000                              ║
+║  Multi-Edition Support: Lite, Standard, Enterprise               ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
@@ -12,6 +13,8 @@ import sys
 import time
 import signal
 import threading
+import argparse
+import os
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -24,11 +27,22 @@ from core.nia_vault import NiAVault
 
 
 class InfiniteServer:
-    """Main server orchestrator"""
+    """Main server orchestrator with multi-edition support"""
     
-    def __init__(self):
-        self.version = "26.2"
-        self.config = ConfigLoader()
+    def __init__(self, edition: str = "standard", config_file: str = None):
+        self.edition = edition.lower()
+        self.version = f"26.2-{self.edition}"
+        
+        # Load edition-specific config
+        if config_file is None:
+            if self.edition == "lite":
+                config_file = "config-lite.yaml"
+            elif self.edition == "enterprise":
+                config_file = "config-enterprise.yaml"
+            else:
+                config_file = "config.yaml"
+        
+        self.config = ConfigLoader(config_file)
         self.logger = Logger.setup("InfiniteServer")
         self.running = False
         
@@ -40,8 +54,14 @@ class InfiniteServer:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         
-        print_banner("INFINITE SERVER26 - FORTRESS", self.version)
-        self.logger.info("Infinite Server26 initializing...")
+        edition_name = {
+            "lite": "FORTRESS LITE",
+            "standard": "FORTRESS",
+            "enterprise": "FORTRESS ENTERPRISE"
+        }.get(self.edition, "FORTRESS")
+        
+        print_banner(f"INFINITE SERVER26 - {edition_name}", self.version)
+        self.logger.info(f"Infinite Server26 {self.edition.upper()} edition initializing...")
     
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals"""
@@ -49,8 +69,8 @@ class InfiniteServer:
         self.shutdown()
     
     def initialize_components(self):
-        """Initialize all server components"""
-        self.logger.info("🚀 Initializing components...")
+        """Initialize all server components based on edition"""
+        self.logger.info(f"🚀 Initializing {self.edition.upper()} edition components...")
         
         try:
             # Initialize NayDoeV1 if enabled
@@ -63,12 +83,18 @@ class InfiniteServer:
                 self.components['jessicai'] = JessicAiHuntress()
                 self.logger.info("✅ JessicAi initialized")
             
-            # Initialize NiA_Vault if enabled
-            if self.config.get('blockchain.nia_vault.enabled', True):
+            # Initialize NiA_Vault if enabled (not in lite edition)
+            if self.edition != "lite" and self.config.get('blockchain.nia_vault.enabled', True):
                 self.components['nia_vault'] = NiAVault()
                 self.logger.info("✅ NiA_Vault initialized")
+            elif self.edition == "lite":
+                self.logger.info("ℹ️  NiA_Vault disabled in Lite edition")
             
-            self.logger.info(f"✅ Initialized {len(self.components)} components")
+            # Enterprise features
+            if self.edition == "enterprise":
+                self.logger.info("ℹ️  Enterprise features available (API, Plugins, HA)")
+            
+            self.logger.info(f"✅ Initialized {len(self.components)} components for {self.edition.upper()} edition")
             
         except Exception as e:
             self.logger.error(f"Error initializing components: {e}")
@@ -153,5 +179,46 @@ class InfiniteServer:
 
 
 if __name__ == '__main__':
-    server = InfiniteServer()
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description='Infinite Server26 - Autonomous AI-Powered Security Fortress',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Edition Options:
+  lite       - Lite edition for personal use (minimal features)
+  standard   - Standard edition for small teams (default)
+  enterprise - Enterprise edition for large organizations
+
+Examples:
+  python3 server.py --edition=lite
+  python3 server.py --edition=standard
+  python3 server.py --edition=enterprise --config=custom-config.yaml
+        """
+    )
+    
+    parser.add_argument(
+        '--edition',
+        type=str,
+        default='standard',
+        choices=['lite', 'standard', 'enterprise'],
+        help='Server edition to run (default: standard)'
+    )
+    
+    parser.add_argument(
+        '--config',
+        type=str,
+        default=None,
+        help='Path to configuration file (auto-selected based on edition if not specified)'
+    )
+    
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='Infinite Server26 v26.2'
+    )
+    
+    args = parser.parse_args()
+    
+    # Create and run server
+    server = InfiniteServer(edition=args.edition, config_file=args.config)
     server.run()

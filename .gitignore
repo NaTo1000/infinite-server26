@@ -63,3 +63,13 @@ docker-compose.override.yml
 # OS
 Thumbs.db
 .DS_Store
+
+# Build artifacts
+build/
+versions/*/
+*.tar.gz
+*.zip
+
+# Cache
+cache/
+.cache/

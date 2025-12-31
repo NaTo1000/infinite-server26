@@ -1,0 +1,59 @@
+# Infinite Server26 Configuration - Lite Edition
+# Version: 26.2-lite
+
+# General Settings
+server:
+  name: "Infinite Server26 Lite"
+  version: "26.2-lite"
+  codename: "FORTRESS LITE"
+  mode: "basic"
+  edition: "lite"
+
+# Logging Configuration (simplified)
+logging:
+  level: "INFO"
+  dir: "./logs"
+  format: "%(asctime)s [%(name)s] %(levelname)s: %(message)s"
+
+# AI Systems (Basic mode)
+ai:
+  naydoev1:
+    enabled: true
+    orchestration_interval: 120  # seconds (less frequent)
+    auto_heal: false  # disabled in lite
+    learning_mode: false  # disabled in lite
+  
+  jessicai:
+    enabled: true
+    security_level: "STANDARD"  # not MAXIMUM
+    mercy_mode: true  # enabled in lite
+    monitoring_interval: 30  # seconds (less frequent)
+    threat_threshold: 20  # higher threshold
+
+# Security (Basic)
+security:
+  malicious_ports:
+    - "4444"
+    - "31337"
+  
+  firewall:
+    enabled: false  # manual setup
+  
+  fail2ban:
+    enabled: false  # manual setup
+
+# Blockchain (Disabled in lite)
+blockchain:
+  nia_vault:
+    enabled: false
+
+# Paths (relative to project root)
+paths:
+  data: "./data"
+  logs: "./logs"
+  storage: "./storage"
+
+# Development
+development:
+  debug: false
+  test_mode: false
