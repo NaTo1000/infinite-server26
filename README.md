@@ -160,7 +160,7 @@ Native Android app featuring:
 
 **Wireless** tools including Aircrack-ng, Wifite, Reaver
 
-**Forensics** with Binwalk, Foremost, Sleuthkit, Autopsy
+**Forensics** with Binwalk, Foremost, Sleuthkit, Autopsy, HandBrake
 
 **Reverse Engineering** using Radare2, Ghidra
 

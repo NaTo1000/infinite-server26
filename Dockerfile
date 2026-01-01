@@ -44,6 +44,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Core essentials
     ca-certificates curl wget git nano vim unzip zip tar gzip \
     software-properties-common apt-transport-https gnupg lsb-release \
+    coreutils \
     # System tools
     systemd systemd-sysv dbus sudo htop tmux screen \
     net-tools iputils-ping dnsutils iproute2 iptables \
@@ -107,7 +108,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Social engineering
     set \
     # Forensics
-    binwalk foremost exiftool sleuthkit autopsy \
+    binwalk foremost exiftool sleuthkit autopsy handbrake-cli \
     # Reverse engineering
     radare2 ghidra \
     # RFID/NFC
