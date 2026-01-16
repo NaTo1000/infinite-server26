@@ -52,7 +52,111 @@ docker-compose up -d
 
 **Access:** `http://localhost:8000` (Fortress) | `http://localhost:8090` (Rancher)
 
-📖 **[Complete Deployment Guide](DEPLOYMENT.md)** | 🐳 **[Docker Build Guide](BUILD_AND_PUSH.md)** | 🤝 **[Contributing](CONTRIBUTING.md)**
+📖 **[Complete Deployment Guide](DEPLOYMENT.md)** | 🐳 **[Docker Documentation](DOCKER.md)** | 🤝 **[Contributing](CONTRIBUTING.md)**
+
+---
+
+## 🐳 Docker Deployment
+
+### Prerequisites
+
+- Docker 20.10+
+- Docker Compose 2.0+
+- 8GB RAM minimum (16GB recommended)
+- 50GB free disk space
+
+### Quick Docker Build
+
+```bash
+# Build optimized production image
+docker build -t nato1000/infinite-server26:latest .
+
+# Run container
+docker run -d \
+  --name fortress \
+  -p 8000:8000 \
+  -p 8080:8080 \
+  --privileged \
+  nato1000/infinite-server26:latest
+
+# Check health
+curl http://localhost:8000/health
+```
+
+### Docker Compose Setup
+
+```bash
+# 1. Setup secrets
+mkdir -p secrets
+openssl rand -base64 32 > secrets/vault_master_key.txt
+openssl rand -base64 24 > secrets/rancher_password.txt
+chmod 600 secrets/*.txt
+
+# 2. Configure environment
+cp .env.example .env
+nano .env  # Edit with your settings
+
+# 3. Create data directories
+mkdir -p data/{fortress,vault,rancher} logs/fortress
+
+# 4. Start services
+docker-compose up -d
+
+# 5. Monitor startup
+docker-compose logs -f
+
+# 6. Verify health
+curl http://localhost:8000/health
+```
+
+### Environment Variables Reference
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `INFINITE_VERSION` | Version number | 26.1 |
+| `NAYDOE_MODE` | Orchestrator mode | autonomous |
+| `JESSICAI_MODE` | Security mode | huntress |
+| `SECURITY_LEVEL` | Security level | maximum |
+| `FORTRESS_PORT` | Main service port | 8000 |
+| `RANCHER_HTTP_PORT` | Rancher HTTP port | 8090 |
+
+**See [DOCKER.md](DOCKER.md) for complete environment variable reference.**
+
+### Build Testing
+
+```bash
+# Run comprehensive Docker tests
+./scripts/docker-test.sh
+
+# This validates:
+# - Image builds successfully
+# - Health checks pass
+# - All services start
+# - Network connectivity
+# - Python dependencies
+# - Directory structure
+```
+
+### Production Deployment
+
+```bash
+# Deploy to production with resource limits
+docker-compose -f docker-compose.yml up -d
+
+# Monitor resources
+docker stats
+
+# View logs
+docker-compose logs -f fortress
+
+# Backup data
+docker run --rm \
+  -v infinite-fortress-data:/data \
+  -v $(pwd):/backup \
+  alpine tar czf /backup/fortress-backup.tar.gz /data
+```
+
+**For complete Docker documentation, see [DOCKER.md](DOCKER.md)**
 
 ---
 
@@ -429,6 +533,46 @@ print(data.decode())
 ---
 
 ## 🚨 Troubleshooting
+
+### Docker Issues
+
+#### Container Won't Start
+
+```bash
+# Check logs
+docker-compose logs fortress
+
+# Verify configuration
+docker-compose config
+
+# Recreate containers
+docker-compose down
+docker-compose up -d --force-recreate
+```
+
+#### Health Check Failing
+
+```bash
+# Test endpoint manually
+curl -v http://localhost:8000/health
+
+# Check container health
+docker inspect fortress | grep -A 10 Health
+
+# View health logs
+docker exec fortress python3 /usr/local/bin/health-check.py 8000
+```
+
+#### Permission Errors
+
+```bash
+# Fix volume permissions
+sudo chown -R 1000:1000 data/
+sudo chmod -R 755 data/
+
+# Fix secret permissions
+chmod 600 secrets/*.txt
+```
 
 ### AI Systems Not Starting
 

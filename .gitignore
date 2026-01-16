@@ -8,8 +8,13 @@ logs/
 /opt/nia-vault/keys/*
 *.encrypted
 
-# Docker
-# .dockerignore should be version controlled
+# Docker data directories
+data/
+!data/.gitkeep
+
+# Docker old files
+Dockerfile.old
+docker-compose.old.yml
 
 # Python
 __pycache__/
@@ -37,6 +42,7 @@ Thumbs.db
 *.pem
 *.crt
 secrets/
+!secrets/*.example
 .env
 
 # Temporary
