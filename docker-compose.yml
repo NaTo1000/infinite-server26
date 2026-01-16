@@ -1,69 +1,233 @@
-version: '3.8'
+# ═══════════════════════════════════════════════════════════════════
+# INFINITE SERVER26 - Docker Compose Configuration
+# Production-Ready Multi-Service Setup
+# ═══════════════════════════════════════════════════════════════════
 
+version: '3.9'
+
+# ═══════════════════════════════════════════════════════════════════
+# SERVICES
+# ═══════════════════════════════════════════════════════════════════
 services:
+  
+  # ═════════════════════════════════════════════════════════════════
   # Infinite Server26 - Main Fortress Container
+  # ═════════════════════════════════════════════════════════════════
   fortress:
-    image: nato1000/infinite-server26:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${INFINITE_VERSION:-26.1}
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+        CODENAME: ${CODENAME:-FORTRESS}
+      target: production
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_IMAGE:-nato1000/infinite-server26}:${IMAGE_TAG:-latest}
     container_name: infinite-fortress
-    privileged: true
-    network_mode: host
+    hostname: fortress
     restart: unless-stopped
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 8G
+        reservations:
+          cpus: '2.0'
+          memory: 4G
+    
+    # Privileged mode for container orchestration (use with caution)
+    privileged: true
+    
+    # Environment variables from .env file
+    env_file:
+      - .env
     environment:
-      - INFINITE_VERSION=26.1
-      - NAYDOE_MODE=autonomous
-      - JESSICAI_MODE=huntress
-      - NAI_GAIL_ENABLED=true
-      - NIA_VAULT_ACTIVE=true
-      - SECURITY_LEVEL=maximum
-      - MERCY_MODE=disabled
+      - INFINITE_VERSION=${INFINITE_VERSION:-26.1}
+      - NAYDOE_MODE=${NAYDOE_MODE:-autonomous}
+      - JESSICAI_MODE=${JESSICAI_MODE:-huntress}
+      - NAI_GAIL_ENABLED=${NAI_GAIL_ENABLED:-true}
+      - NIA_VAULT_ACTIVE=${NIA_VAULT_ACTIVE:-true}
+      - SECURITY_LEVEL=${SECURITY_LEVEL:-maximum}
+      - MERCY_MODE=${MERCY_MODE:-disabled}
+      - FORTRESS_IP=${FORTRESS_IP:-0.0.0.0}
+      - FORTRESS_PORT=${FORTRESS_PORT:-8000}
+    
+    # Secrets management
+    secrets:
+      - vault_master_key
+      - rancher_password
+    
+    # Volumes
     volumes:
       - fortress-data:/root/fortress
-      - vault-storage:/opt/nia-vault/storage
-      - logs:/var/log
-      - /var/run/docker.sock:/var/run/docker.sock
+      - vault-storage:/opt/nia-vault/storage:rw
+      - fortress-logs:/var/log/fortress:rw
+      - fortress-config:/root/config:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    # Port mappings
     ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-      - "8443:8443"
-      - "6443:6443"
-      - "2376:2376"
-      - "2377:2377"
-      - "5000:5000"
-      - "8000:8000"
-      - "9000:9000"
+      - "${FORTRESS_PORT:-8000}:8000"
+      - "${FORTRESS_API_PORT:-8080}:8080"
+      - "${FORTRESS_HTTPS_PORT:-8443}:8443"
+    
+    # Networking
+    networks:
+      - fortress-network
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+        tag: "fortress/{{.Name}}"
+    
+    # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
-
+      start_period: 40s
+    
+    # Dependencies
+    depends_on:
+      rancher:
+        condition: service_healthy
+  
+  # ═════════════════════════════════════════════════════════════════
   # Rancher - Container Management Dashboard
+  # ═════════════════════════════════════════════════════════════════
   rancher:
-    image: rancher/rancher:latest
+    image: rancher/rancher:${RANCHER_VERSION:-latest}
     container_name: rancher-dashboard
+    hostname: rancher
     restart: unless-stopped
+    
+    # Resource limits for Rancher
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    
+    # Privileged for cluster management
     privileged: true
-    ports:
-      - "8090:80"
-      - "8444:443"
-    volumes:
-      - rancher-data:/var/lib/rancher
+    
+    # Environment
     environment:
       - CATTLE_BOOTSTRAP_PASSWORD=${RANCHER_PASSWORD:-admin}
+      - CATTLE_SYSTEM_DEFAULT_REGISTRY=${DOCKER_REGISTRY:-docker.io}
+    
+    # Secrets
+    secrets:
+      - rancher_password
+    
+    # Volumes
+    volumes:
+      - rancher-data:/var/lib/rancher:rw
+      - rancher-logs:/var/log/rancher:rw
+    
+    # Ports
+    ports:
+      - "${RANCHER_HTTP_PORT:-8090}:80"
+      - "${RANCHER_HTTPS_PORT:-8444}:443"
+    
+    # Networking
+    networks:
+      - fortress-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "service,component"
+        tag: "rancher/{{.Name}}"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
+# ═══════════════════════════════════════════════════════════════════
+# NETWORKS
+# ═══════════════════════════════════════════════════════════════════
+networks:
+  fortress-network:
+    name: infinite-fortress-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.0.0/16
+          gateway: 172.26.0.1
+    driver_opts:
+      com.docker.network.bridge.name: br-fortress
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
+
+# ═══════════════════════════════════════════════════════════════════
+# VOLUMES
+# ═══════════════════════════════════════════════════════════════════
 volumes:
   fortress-data:
+    name: infinite-fortress-data
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${FORTRESS_DATA_PATH:-./data/fortress}
+    
   vault-storage:
+    name: infinite-vault-storage
     driver: local
-  logs:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${VAULT_STORAGE_PATH:-./data/vault}
+  
+  fortress-logs:
+    name: infinite-fortress-logs
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${FORTRESS_LOGS_PATH:-./logs/fortress}
+  
+  fortress-config:
+    name: infinite-fortress-config
+    driver: local
+  
   rancher-data:
+    name: rancher-data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RANCHER_DATA_PATH:-./data/rancher}
+  
+  rancher-logs:
+    name: rancher-logs
     driver: local
 
-networks:
-  default:
-    name: infinite-network
-    driver: bridge
+# ═══════════════════════════════════════════════════════════════════
+# SECRETS
+# ═══════════════════════════════════════════════════════════════════
+secrets:
+  vault_master_key:
+    file: ${VAULT_MASTER_KEY_FILE:-./secrets/vault_master_key.txt}
+  rancher_password:
+    file: ${RANCHER_PASSWORD_FILE:-./secrets/rancher_password.txt}

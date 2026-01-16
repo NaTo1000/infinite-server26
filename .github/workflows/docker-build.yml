@@ -1,0 +1,271 @@
+name: Docker Build, Test & Security Scan
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  DOCKERHUB_REGISTRY: docker.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKERHUB_IMAGE: nato1000/infinite-server26
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════
+  # Build and Test Job
+  # ═══════════════════════════════════════════════════════════════════
+  build-and-test:
+    name: Build, Test & Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    
+    steps:
+      # ─────────────────────────────────────────────────────────────
+      # Checkout repository
+      # ─────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      # ─────────────────────────────────────────────────────────────
+      # Set up build metadata
+      # ─────────────────────────────────────────────────────────────
+      - name: Set build metadata
+        id: meta_vars
+        run: |
+          echo "BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_OUTPUT
+          echo "VCS_REF=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "VERSION=26.1" >> $GITHUB_OUTPUT
+      
+      # ─────────────────────────────────────────────────────────────
+      # Set up QEMU for multi-platform builds
+      # ─────────────────────────────────────────────────────────────
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      
+      # ─────────────────────────────────────────────────────────────
+      # Set up Docker Buildx
+      # ─────────────────────────────────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+      
+      # ─────────────────────────────────────────────────────────────
+      # Log in to GitHub Container Registry
+      # ─────────────────────────────────────────────────────────────
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      # ─────────────────────────────────────────────────────────────
+      # Log in to Docker Hub
+      # ─────────────────────────────────────────────────────────────
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # ─────────────────────────────────────────────────────────────
+      # Extract metadata for Docker
+      # ─────────────────────────────────────────────────────────────
+      - name: Extract metadata for GHCR
+        id: meta_ghcr
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=26.1
+            type=raw,value=fortress
+            type=sha,prefix={{branch}}-
+      
+      - name: Extract metadata for Docker Hub
+        id: meta_dockerhub
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=26.1
+            type=raw,value=fortress
+            type=sha,prefix={{branch}}-
+      
+      # ─────────────────────────────────────────────────────────────
+      # Build Docker image (cache for testing)
+      # ─────────────────────────────────────────────────────────────
+      - name: Build Docker image for testing
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          platforms: linux/amd64
+          load: true
+          tags: ${{ env.DOCKERHUB_IMAGE }}:test
+          build-args: |
+            VERSION=${{ steps.meta_vars.outputs.VERSION }}
+            BUILD_DATE=${{ steps.meta_vars.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.meta_vars.outputs.VCS_REF }}
+            CODENAME=FORTRESS
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      # ─────────────────────────────────────────────────────────────
+      # Run Docker test script
+      # ─────────────────────────────────────────────────────────────
+      - name: Run Docker test script
+        run: |
+          chmod +x scripts/docker-test.sh
+          IMAGE_TAG=test ./scripts/docker-test.sh
+      
+      # ─────────────────────────────────────────────────────────────
+      # Build and push multi-platform images
+      # ─────────────────────────────────────────────────────────────
+      - name: Build and push to GitHub Container Registry
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_ghcr.outputs.tags }}
+          labels: ${{ steps.meta_ghcr.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.meta_vars.outputs.VERSION }}
+            BUILD_DATE=${{ steps.meta_vars.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.meta_vars.outputs.VCS_REF }}
+            CODENAME=FORTRESS
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta_dockerhub.outputs.tags }}
+          labels: ${{ steps.meta_dockerhub.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.meta_vars.outputs.VERSION }}
+            BUILD_DATE=${{ steps.meta_vars.outputs.BUILD_DATE }}
+            VCS_REF=${{ steps.meta_vars.outputs.VCS_REF }}
+            CODENAME=FORTRESS
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      # ─────────────────────────────────────────────────────────────
+      # Image digest output
+      # ─────────────────────────────────────────────────────────────
+      - name: Output image metadata
+        run: |
+          echo "### Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**GHCR Tags:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta_ghcr.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Hub Tags:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta_dockerhub.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Args:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ steps.meta_vars.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Date: ${{ steps.meta_vars.outputs.BUILD_DATE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- VCS Ref: ${{ steps.meta_vars.outputs.VCS_REF }}" >> $GITHUB_STEP_SUMMARY
+  
+  # ═══════════════════════════════════════════════════════════════════
+  # Security Scan Job
+  # ═══════════════════════════════════════════════════════════════════
+  security-scan:
+    name: Security Scan with Trivy
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Pull image for scanning
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest || \
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+      
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Run Trivy vulnerability scanner (table format)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+      
+      - name: Generate security summary
+        run: |
+          echo "### Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Trivy scan completed for:" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Scan Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the Security tab for detailed vulnerability results." >> $GITHUB_STEP_SUMMARY
