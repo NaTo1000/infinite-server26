@@ -186,26 +186,14 @@ volumes:
   fortress-data:
     name: infinite-fortress-data
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${FORTRESS_DATA_PATH:-./data/fortress}
     
   vault-storage:
     name: infinite-vault-storage
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${VAULT_STORAGE_PATH:-./data/vault}
   
   fortress-logs:
     name: infinite-fortress-logs
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${FORTRESS_LOGS_PATH:-./logs/fortress}
   
   fortress-config:
     name: infinite-fortress-config
@@ -214,10 +202,6 @@ volumes:
   rancher-data:
     name: rancher-data
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${RANCHER_DATA_PATH:-./data/rancher}
   
   rancher-logs:
     name: rancher-logs

@@ -139,6 +139,7 @@ coverage/
 
 # Secrets and keys (CRITICAL - never include in image)
 secrets/
+!secrets/*.example
 *.key
 *.pem
 *.crt
