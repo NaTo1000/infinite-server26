@@ -15,7 +15,6 @@ import sys
 import time
 import json
 import subprocess
-import threading
 import logging
 from datetime import datetime
 from collections import defaultdict

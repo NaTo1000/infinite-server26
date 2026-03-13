@@ -8,14 +8,12 @@
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
-import os
 import sys
 import json
 import importlib
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any
 
 class Plugin:
     """Base plugin class"""

@@ -8,15 +8,12 @@
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
-import os
-import sys
 import json
 import requests
 import feedparser
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 import threading
 import time
 
@@ -383,7 +380,7 @@ if __name__ == '__main__':
     print(f"Total Streams: {status['total_streams']}")
     print(f"Enabled Streams: {status['enabled_streams']}")
     print(f"Cached Streams: {status['cached_streams']}")
-    print(f"\nCategories:")
+    print("\nCategories:")
     for cat in status['categories']:
         print(f"  • {cat}")
     

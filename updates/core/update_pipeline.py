@@ -9,7 +9,6 @@
 """
 
 import os
-import sys
 import json
 import requests
 import subprocess
@@ -17,7 +16,6 @@ import logging
 import hashlib
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
 
 class UpdatePipeline:
     def __init__(self):
@@ -362,7 +360,7 @@ if __name__ == '__main__':
     print(f"Total Schedule Items: {status['total_schedule_items']}")
     
     if status['next_update']:
-        print(f"\nNext Update:")
+        print("\nNext Update:")
         print(f"  Date: {status['next_update']['date']}")
         print(f"  Type: {status['next_update']['type']}")
         print(f"  Priority: {status['next_update']['priority']}")
