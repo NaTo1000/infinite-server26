@@ -8,14 +8,11 @@
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
-import os
 import sys
-import json
 import logging
 import threading
 import time
 from datetime import datetime
-from pathlib import Path
 
 # Add paths
 sys.path.insert(0, '/opt/infinite-server26')
@@ -256,11 +253,11 @@ class PipelineOrchestrator:
         
         try:
             # Daily report
-            daily_report = self.intel_aggregator.generate_daily_report()
-            
+            self.intel_aggregator.generate_daily_report()
+
             # Weekly report (if Monday)
             if datetime.now().weekday() == 0:
-                weekly_report = self.intel_aggregator.generate_weekly_report()
+                self.intel_aggregator.generate_weekly_report()
             
             self.logger.info("✅ Reports generated")
             return True
@@ -361,7 +358,7 @@ if __name__ == '__main__':
     status = orchestrator.get_system_status()
     print(f"Orchestrator Version: {status['orchestrator_version']}")
     print(f"Running: {status['running']}")
-    print(f"\nComponents:")
+    print("\nComponents:")
     for component, info in status['components'].items():
         print(f"  {component}: {info['status']}")
     

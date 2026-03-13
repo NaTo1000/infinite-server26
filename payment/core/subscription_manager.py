@@ -8,7 +8,6 @@
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
-import os
 import sys
 import json
 import logging
@@ -16,7 +15,6 @@ import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Optional
 
 # Add paths
 sys.path.insert(0, '/opt/infinite-server26')
@@ -257,38 +255,30 @@ class SubscriptionManager:
         """Auto-renew subscriptions"""
         try:
             self.logger.info("🔄 Processing auto-renewals...")
-            
-            renewed_count = 0
-            
+
+            upcoming_count = 0
+
             for sub_id, subscription in self.subscriptions.items():
                 if subscription['status'] != 'active':
                     continue
-                
+
                 if not subscription.get('auto_renew', True):
                     continue
-                
+
                 period_end = datetime.fromisoformat(subscription['current_period_end'])
                 days_until_expiry = (period_end - datetime.now()).days
-                
-                # Auto-renew 1 day before expiry
+
+                # Log subscriptions renewing tomorrow; Stripe handles billing automatically.
                 if days_until_expiry == 1:
-                    self.logger.info(f"🔄 Auto-renewing subscription: {sub_id}")
-                    
-                    # Call Stripe to process payment
-                    from payment.core.stripe_integration import StripePaymentSystem
-                    stripe_system = StripePaymentSystem()
-                    
-                    # Stripe will automatically charge the customer
-                    # and trigger webhook events
-                    
-                    renewed_count += 1
-            
-            if renewed_count > 0:
-                self.logger.info(f"✅ Auto-renewed {renewed_count} subscriptions")
+                    self.logger.info(f"⏰ Subscription renewing tomorrow (Stripe will charge): {sub_id}")
+                    upcoming_count += 1
+
+            if upcoming_count > 0:
+                self.logger.info(f"ℹ️  {upcoming_count} subscription(s) renewing tomorrow via Stripe")
             else:
-                self.logger.info("ℹ️  No subscriptions to auto-renew")
-            
-            return renewed_count
+                self.logger.info("ℹ️  No subscriptions renewing tomorrow")
+
+            return upcoming_count
             
         except Exception as e:
             self.logger.error(f"❌ Failed to auto-renew subscriptions: {e}")

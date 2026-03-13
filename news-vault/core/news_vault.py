@@ -9,13 +9,11 @@
 """
 
 import os
-import sys
 import json
 import logging
 import hashlib
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Protocol.KDF import PBKDF2
@@ -30,7 +28,7 @@ class NewsVault:
         
         # Encryption
         self.master_key = None
-        self.vault_password = "nato1000_news_vault_secure"  # Should be changed
+        self.vault_password = os.getenv('NEWS_VAULT_PASSWORD', 'nato1000_news_vault_secure')
         
         # Storage index
         self.vault_index = {}

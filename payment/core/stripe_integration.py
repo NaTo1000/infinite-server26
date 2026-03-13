@@ -9,14 +9,8 @@
 """
 
 import os
-import sys
-import json
 import logging
-import hashlib
-import hmac
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Optional
 
 # Stripe SDK (install with: pip3 install stripe)
 try:
@@ -216,7 +210,7 @@ class StripePaymentSystem:
         try:
             self.logger.info(f"❌ Canceling subscription: {subscription_id}")
             
-            subscription = stripe.Subscription.delete(subscription_id)
+            stripe.Subscription.delete(subscription_id)
             
             self.logger.info(f"✅ Subscription canceled: {subscription_id}")
             return True

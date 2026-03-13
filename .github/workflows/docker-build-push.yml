@@ -49,6 +49,7 @@ jobs:
             type=raw,value=fortress
 
       - name: Build and push Docker image
+        id: docker_build
         uses: docker/build-push-action@v5
         with:
           context: .

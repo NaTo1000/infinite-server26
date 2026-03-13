@@ -9,7 +9,6 @@
 """
 
 import os
-import sys
 import json
 import logging
 import hashlib
@@ -17,7 +16,6 @@ import hmac
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Optional
 
 class LicenseManager:
     def __init__(self):
@@ -416,7 +414,7 @@ if __name__ == '__main__':
     )
     
     if test_license:
-        print(f"✅ Test License Generated:")
+        print("✅ Test License Generated:")
         print(f"   {test_license}")
         print(f"   Length: {len(test_license.replace('-', ''))} characters (256 hex chars = 1024 bits)")
         

@@ -6,7 +6,6 @@ services:
     image: nato1000/infinite-server26:latest
     container_name: infinite-fortress
     privileged: true
-    network_mode: host
     restart: unless-stopped
     environment:
       - INFINITE_VERSION=26.1
