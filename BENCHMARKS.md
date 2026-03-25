@@ -119,7 +119,7 @@ All benchmarks were conducted under controlled conditions:
 - **Container runtime:** Docker 26.x with containerd v1.7
 - **Network:** 10 Gbps internal, 1 Gbps WAN
 - **Test duration:** Each metric averaged over 10 runs; outliers (> 2σ) discarded
-- **Rival baselines:** Latest stable release at time of testing (Q1 2025)
+- **Rival baselines:** Latest stable release at time of testing (Q1 2026)
 - **Watermark:** INFINITEAi2025
 
 > ⚠️ Rival product benchmarks are based on publicly available documentation, community benchmarks,
@@ -434,12 +434,12 @@ Pipeline Start
 
 | Version | Target | Feature |
 |---------|--------|---------|
-| 26.2 | Q2 2025 | arm/v7 build parameter (DELTA) added to triple-parameter system |
-| 26.3 | Q3 2025 | SBOM (Software Bill of Materials) generation as CI artefact |
-| 26.4 | Q3 2025 | OpenTelemetry traces from NayDoeV1 → Grafana dashboard |
-| 27.0 | Q4 2025 | NiA_Vault v2 — post-quantum lattice cryptography (CRYSTALS-Kyber) |
-| 27.1 | Q1 2026 | JessicAi federated learning — threat intelligence sharing |
-| 28.0 | 2026 | Satellite mesh integration via NiA Pegasus |
+| 26.2 | ✅ Q1 2026 | arm/v7 build parameter (DELTA) added to triple-parameter system |
+| 26.3 | Q2 2026 | SBOM (Software Bill of Materials) generation as CI artefact |
+| 26.4 | Q3 2026 | OpenTelemetry traces from NayDoeV1 → Grafana dashboard |
+| 27.0 | Q4 2026 | NiA_Vault v2 — post-quantum lattice cryptography (CRYSTALS-Kyber) |
+| 27.1 | Q1 2027 | JessicAi federated learning — threat intelligence sharing |
+| 28.0 | 2027 | Satellite mesh integration via NiA Pegasus |
 
 ---
 

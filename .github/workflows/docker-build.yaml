@@ -74,6 +74,9 @@ jobs:
   gamma-security-gate:
     name: "🔐 GAMMA Gate — Lint & Pre-Build Security [INFINITEAi2025]"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     outputs:
       gate_passed: ${{ steps.set-outcome.outputs.gate_passed }}
 
@@ -404,6 +407,7 @@ jobs:
   notify-on-failure:
     name: "🚨 Failure Notification [INFINITEAi2025]"
     runs-on: ubuntu-latest
+    permissions: {}
     needs:
       - gamma-security-gate
       - alpha-build-amd64
