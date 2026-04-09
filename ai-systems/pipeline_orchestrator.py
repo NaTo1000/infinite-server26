@@ -18,9 +18,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Dict, Optional
 
-# ── Path bootstrap (configurable via env var) ────────────────────────────────
-_BASE = Path(os.getenv('INFINITE_BASE_DIR', '/opt/infinite-server26'))
-_LOG_DIR = Path(os.getenv('INFINITE_LOG_DIR', '/var/log'))
+# ── Path bootstrap ────────────────────────────────────────────────────────────
+# INFINITE_BASE_DIR: root of the infinite-server26 installation
+#   default: /opt/infinite-server26
+# INFINITE_LOG_DIR:  directory for log files
+#   default: /var/log
+_BASE    = Path(os.getenv('INFINITE_BASE_DIR', '/opt/infinite-server26'))
+_LOG_DIR = Path(os.getenv('INFINITE_LOG_DIR',  '/var/log'))
 
 
 def _add_path(p: Path) -> None:
@@ -136,6 +140,11 @@ class ComponentRecord:
         except Exception as exc:
             logger.warning("⚠️   %s health-check raised: %s", self.name, exc)
             return False
+
+    def get_instance(self):
+        """Return the running instance, or None if not running (thread-safe)."""
+        with self._lock:
+            return self.instance if self.state == ComponentState.RUNNING else None
 
     def snapshot(self) -> dict:
         with self._lock:
@@ -269,11 +278,13 @@ class PipelineOrchestrator:
                         name=f'jessicai-{target.__name__}',
                     )
                     t.start()
+            def _jessicai_stopper(h) -> None:
+                h.running = False
             reg['jessicai'] = ComponentRecord(
                 'JessicAiHuntress',
                 JessicAiHuntress,
                 starter=_jessicai_starter,
-                stopper=lambda h: setattr(h, 'running', False),
+                stopper=_jessicai_stopper,
                 health_check=lambda h: h.running,
             )
         except ImportError as exc:
@@ -351,15 +362,19 @@ class PipelineOrchestrator:
             if not (sm_rec and ia_rec and nv_rec):
                 self._logger.warning("Required components missing for aggregation")
                 return 0
-            with sm_rec._lock:
-                stream_data = sm_rec.instance.stream_data if sm_rec.instance else {}
-            with ia_rec._lock:
-                count = ia_rec.instance.aggregate_from_streams(stream_data) if ia_rec.instance else 0
-                intel = dict(ia_rec.instance.intelligence) if ia_rec.instance else {}
-            if nv_rec.instance:
+            sm = sm_rec.get_instance()
+            ia = ia_rec.get_instance()
+            nv = nv_rec.get_instance()
+            if not (sm and ia):
+                self._logger.warning("Required components not running for aggregation")
+                return 0
+            stream_data = sm.stream_data
+            count = ia.aggregate_from_streams(stream_data)
+            intel = dict(ia.intelligence)
+            if nv:
                 for items in intel.values():
                     for item in items:
-                        nv_rec.instance.store_article(item)
+                        nv.store_article(item)
             self._logger.info("✅ Aggregated %d intelligence items", count)
             return count
         except Exception as exc:

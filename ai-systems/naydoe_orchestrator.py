@@ -65,17 +65,19 @@ class NayDoeV1Orchestrator:
 
     # ── Resource assessment ────────────────────────────────────────────────
     def check_memory(self) -> dict:
-        """Return basic memory usage info."""
+        """Return basic memory usage info (Linux only; returns zeros on other platforms)."""
         try:
             result = subprocess.run(
                 ['free', '-m'], capture_output=True, text=True, timeout=5
             )
+            if result.returncode != 0:
+                return {'total_mb': 0, 'used_mb': 0, 'usage_pct': 0.0}
             parts = result.stdout.splitlines()[1].split()
             total, used = int(parts[1]), int(parts[2])
             pct = round(used / total * 100, 1) if total else 0.0
             return {'total_mb': total, 'used_mb': used, 'usage_pct': pct}
         except Exception as exc:
-            logger.debug("Memory check failed: %s", exc)
+            logger.debug("Memory check failed (Linux `free` required): %s", exc)
             return {'total_mb': 0, 'used_mb': 0, 'usage_pct': 0.0}
 
     def check_cpu_load(self) -> Tuple[float, float, float]:
@@ -109,7 +111,7 @@ class NayDoeV1Orchestrator:
 
     # ── Persistence ────────────────────────────────────────────────────────
     def save_state(self) -> None:
-        """Persist observations and patterns to disk."""
+        """Persist observations and patterns to disk atomically."""
         try:
             data = {
                 'observations': self._observations[-1000:],
@@ -117,7 +119,9 @@ class NayDoeV1Orchestrator:
                 'patterns':     dict(self._patterns),
                 'saved_at':     datetime.now().isoformat(),
             }
-            self._obs_path.write_text(json.dumps(data, indent=2))
+            tmp_path = self._obs_path.with_suffix('.tmp')
+            tmp_path.write_text(json.dumps(data, indent=2))
+            tmp_path.replace(self._obs_path)
         except Exception as exc:
             logger.warning("Could not save state: %s", exc)
 
