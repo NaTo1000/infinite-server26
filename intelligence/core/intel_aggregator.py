@@ -9,15 +9,11 @@
 """
 
 import os
-import sys
 import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
-
-# Add parent directories to path
-sys.path.insert(0, '/opt/infinite-server26')
 
 class IntelligenceAggregator:
     def __init__(self):
@@ -48,15 +44,6 @@ class IntelligenceAggregator:
         self.intel_dir.mkdir(parents=True, exist_ok=True)
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [IntelAggregator] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/intel-aggregator.log'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger('IntelAggregator')
         
         self.logger.info("Intelligence Aggregator initialized")

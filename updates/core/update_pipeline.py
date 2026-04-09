@@ -43,15 +43,6 @@ class UpdatePipeline:
         self.update_dir.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [UpdatePipeline] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/update-pipeline.log'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger('UpdatePipeline')
         
         self.logger.info("Update Pipeline initialized")
@@ -148,7 +139,7 @@ class UpdatePipeline:
                     'date': release.get('published_at', ''),
                     'url': release.get('html_url', '')
                 }]
-        except:
+        except Exception:
             pass
         
         return []
@@ -172,7 +163,7 @@ class UpdatePipeline:
                     'current_tags': local_tags,
                     'check_url': self.sources['docker']
                 }]
-        except:
+        except Exception:
             pass
         
         return []
@@ -202,7 +193,7 @@ class UpdatePipeline:
                         'count': len(packages),
                         'packages': packages[:10]  # First 10 packages
                     }]
-        except:
+        except Exception:
             pass
         
         return []

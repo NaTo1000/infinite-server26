@@ -157,15 +157,6 @@ class DataStreamManager:
         self.stream_dir.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [DataStreamManager] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/data-streams.log'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger('DataStreamManager')
         
         # Stream data storage

@@ -39,15 +39,6 @@ class NewsVault:
         self.vault_dir.mkdir(parents=True, exist_ok=True)
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [NewsVault] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/news-vault.log'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger('NewsVault')
         
         # Initialize vault

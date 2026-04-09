@@ -55,15 +55,6 @@ class PluginManager:
         self.loaded_plugins = {}
         self.plugin_config = {}
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [PluginManager] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/plugin-manager.log'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger('PluginManager')
         
         # Create plugin directory

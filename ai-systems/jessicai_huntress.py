@@ -48,15 +48,6 @@ class JessicAiHuntress:
         self.threat_patterns = []
         self.behavioral_baseline = {}
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [JESSICAI] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/jessicai.log'),
-                logging.StreamHandler()
-            ]
-        )
         self.logger = logging.getLogger('JessicAi')
         
         self.print_banner()
@@ -125,7 +116,7 @@ class JessicAiHuntress:
                             })
             
             return connections
-        except:
+        except Exception:
             return []
     
     def is_threat(self, ip, port):
@@ -181,7 +172,7 @@ class JessicAiHuntress:
                 timeout=5
             )
             return True
-        except:
+        except Exception:
             return False
     
     def eliminate_threat(self, ip):
@@ -196,13 +187,13 @@ class JessicAiHuntress:
         try:
             subprocess.run(['iptables', '-A', 'INPUT', '-s', ip, '-j', 'REJECT'], timeout=5)
             subprocess.run(['iptables', '-A', 'OUTPUT', '-d', ip, '-j', 'REJECT'], timeout=5)
-        except:
+        except Exception:
             pass
         
         # Report to fail2ban
         try:
             subprocess.run(['fail2ban-client', 'set', 'sshd', 'banip', ip], timeout=5)
-        except:
+        except Exception:
             pass
     
     def log_threat(self, ip, port, reason):
@@ -252,7 +243,7 @@ class JessicAiHuntress:
                         ['iptables', '-A', 'INPUT', '-s', f'{prefix}.0.0/16', '-j', 'DROP'],
                         timeout=5
                     )
-                except:
+                except Exception:
                     pass
     
     def monitor_files(self):
@@ -296,7 +287,7 @@ class JessicAiHuntress:
         try:
             with open(filepath, 'rb') as f:
                 return hashlib.sha256(f.read()).hexdigest()
-        except:
+        except Exception:
             return None
     
     def monitor_processes(self):
@@ -391,6 +382,13 @@ if __name__ == '__main__':
     if os.getenv('USER') not in ['root', 'nato1000']:
         print("❌ UNAUTHORIZED: Only nato1000 can run JessicAi")
         sys.exit(1)
-    
+
+    # Bootstrap logging when run standalone
+    if not logging.getLogger().handlers:
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s [%(name)s] %(levelname)s: %(message)s',
+        )
+
     huntress = JessicAiHuntress()
     huntress.start()
