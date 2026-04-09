@@ -16,10 +16,57 @@ import sys
 import json
 import time
 import socket
+import subprocess
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+
+# Record service start time so /health can report real uptime
+_START_TIME = time.time()
+
+
+import logging as _logging
+_hc_log = _logging.getLogger('health-check')
+
+
+def _check_process(name: str) -> str:
+    """Return 'running' if a process matching *name* exists, else 'stopped'."""
+    try:
+        result = subprocess.run(
+            ['pgrep', '-f', name],
+            capture_output=True,
+            timeout=3,
+        )
+        return 'running' if result.returncode == 0 else 'stopped'
+    except Exception as e:
+        _hc_log.debug(f"pgrep check failed for {name}: {e}")
+        return 'unknown'
+
+
+def _check_docker_container(name: str) -> str:
+    """Return 'running' if the named Docker container is up, else 'stopped'."""
+    try:
+        result = subprocess.run(
+            ['docker', 'ps', '--filter', f'name={name}', '--format', '{{.Names}}'],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+        return 'running' if name in result.stdout else 'stopped'
+    except Exception as e:
+        _hc_log.debug(f"docker ps check failed for {name}: {e}")
+        return 'unknown'
+
+
+def _get_component_statuses() -> dict:
+    return {
+        'naydoev1': _check_process('naydoe_orchestrator'),
+        'jessicai':  _check_process('jessicai_huntress'),
+        'nai_gail':  _check_process('mesh_shield'),
+        'nia_vault':  _check_process('nia_vault_blockchain'),
+        'rancher':   _check_docker_container('rancher'),
+    }
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
     """Simple health check endpoint handler"""
@@ -44,14 +91,8 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
                 'codename': 'FORTRESS',
                 'timestamp': datetime.utcnow().isoformat() + 'Z',
                 'hostname': socket.gethostname(),
-                'uptime': time.time(),
-                'components': {
-                    'naydoev1': 'operational',
-                    'jessicai': 'hunting',
-                    'nai_gail': 'shielding',
-                    'nia_vault': 'encrypting',
-                    'rancher': 'orchestrating'
-                },
+                'uptime_seconds': int(time.time() - _START_TIME),
+                'components': _get_component_statuses(),
                 'security': {
                     'level': 'MAXIMUM',
                     'mercy_mode': 'DISABLED',

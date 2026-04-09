@@ -48,16 +48,20 @@ class JessicAiHuntress:
         self.threat_patterns = []
         self.behavioral_baseline = {}
         
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [JESSICAI] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/jessicai.log'),
-                logging.StreamHandler()
-            ]
-        )
+        # Setup logger without calling basicConfig (avoids conflicts with other modules)
         self.logger = logging.getLogger('JessicAi')
+        if not self.logger.handlers:
+            self.logger.setLevel(logging.INFO)
+            fmt = logging.Formatter('%(asctime)s [JESSICAI] %(levelname)s: %(message)s')
+            sh = logging.StreamHandler()
+            sh.setFormatter(fmt)
+            self.logger.addHandler(sh)
+            try:
+                fh = logging.FileHandler('/var/log/jessicai.log')
+                fh.setFormatter(fmt)
+                self.logger.addHandler(fh)
+            except OSError:
+                pass
         
         self.print_banner()
     
@@ -111,24 +115,30 @@ class JessicAiHuntress:
                 text=True,
                 timeout=5
             )
-            
+
             connections = []
-            for line in result.stdout.split('\n'):
-                if line.strip():
-                    parts = line.split()
-                    if len(parts) >= 5:
-                        remote = parts[4].split(':')
-                        if len(remote) == 2:
-                            connections.append({
-                                'remote_ip': remote[0],
-                                'remote_port': remote[1]
-                            })
-            
+            for line in result.stdout.splitlines():
+                parts = line.split()
+                if len(parts) < 5:
+                    continue
+                remote = parts[4]
+                # rsplit on ':' once to separate host from port (handles IPv4, IPv6,
+                # and bracket-notation addresses like [::1]:443)
+                idx = remote.rfind(':')
+                if idx == -1:
+                    continue
+                remote_ip = remote[:idx].strip('[]')
+                remote_port = remote[idx + 1:]
+                if remote_ip and remote_port:
+                    connections.append({
+                        'remote_ip': remote_ip,
+                        'remote_port': remote_port,
+                    })
+
             return connections
-        except:
+        except Exception as e:
+            self.logger.debug(f"get_active_connections error: {e}")
             return []
-    
-    def is_threat(self, ip, port):
         """Determine if IP/port is a threat"""
         # Check banned IPs
         if ip in self.banned_ips:
@@ -181,29 +191,30 @@ class JessicAiHuntress:
                 timeout=5
             )
             return True
-        except:
+        except Exception as e:
+            self.logger.warning(f"iptables block failed for {ip}: {e}")
             return False
-    
+
     def eliminate_threat(self, ip):
         """Eliminate persistent threat - NO MERCY MODE"""
         self.threats_eliminated += 1
         self.logger.critical(f"💀 ELIMINATING THREAT: {ip}")
-        
+
         # Add to permanent ban list
         self.banned_ips.add(ip)
-        
+
         # Block all protocols
         try:
             subprocess.run(['iptables', '-A', 'INPUT', '-s', ip, '-j', 'REJECT'], timeout=5)
             subprocess.run(['iptables', '-A', 'OUTPUT', '-d', ip, '-j', 'REJECT'], timeout=5)
-        except:
-            pass
-        
+        except Exception as e:
+            self.logger.error(f"iptables REJECT failed for {ip}: {e}")
+
         # Report to fail2ban
         try:
             subprocess.run(['fail2ban-client', 'set', 'sshd', 'banip', ip], timeout=5)
-        except:
-            pass
+        except Exception as e:
+            self.logger.warning(f"fail2ban ban failed for {ip}: {e}")
     
     def log_threat(self, ip, port, reason):
         """Log threat to database"""
@@ -252,10 +263,8 @@ class JessicAiHuntress:
                         ['iptables', '-A', 'INPUT', '-s', f'{prefix}.0.0/16', '-j', 'DROP'],
                         timeout=5
                     )
-                except:
-                    pass
-    
-    def monitor_files(self):
+                except Exception as e:
+                    self.logger.warning(f"iptables subnet block failed for {prefix}.0.0/16: {e}")
         """Monitor file system for unauthorized changes"""
         self.logger.info("📁 File monitoring started")
         
@@ -296,10 +305,9 @@ class JessicAiHuntress:
         try:
             with open(filepath, 'rb') as f:
                 return hashlib.sha256(f.read()).hexdigest()
-        except:
+        except Exception as e:
+            self.logger.debug(f"Could not hash {filepath}: {e}")
             return None
-    
-    def monitor_processes(self):
         """Monitor running processes for suspicious activity"""
         self.logger.info("⚙️  Process monitoring started")
         

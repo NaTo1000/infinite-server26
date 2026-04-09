@@ -27,30 +27,34 @@ class NayDoeV1Orchestrator:
         self.mode = "AUTONOMOUS"
         self.running = True
         
-        # System components
+        # Component status – 'proc' stores a Popen handle for managed processes
         self.components = {
-            'jessicai': {'status': 'stopped', 'pid': None},
-            'nai_gail': {'status': 'stopped', 'pid': None},
-            'nia_vault': {'status': 'stopped', 'pid': None},
-            'rancher': {'status': 'stopped', 'pid': None},
-            'docker': {'status': 'unknown', 'pid': None}
+            'jessicai': {'status': 'stopped', 'proc': None},
+            'nai_gail': {'status': 'stopped', 'proc': None},
+            'nia_vault': {'status': 'stopped', 'proc': None},
+            'rancher':   {'status': 'stopped', 'proc': None},
+            'docker':    {'status': 'unknown', 'proc': None},
         }
-        
+
         # Learning system
         self.observations = []
         self.decisions = []
         self.patterns = defaultdict(int)
-        
-        # Setup logging
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s [NAYDOEV1] %(levelname)s: %(message)s',
-            handlers=[
-                logging.FileHandler('/var/log/naydoev1.log'),
-                logging.StreamHandler()
-            ]
-        )
+
+        # Setup logger without calling basicConfig (may conflict with other modules)
         self.logger = logging.getLogger('NayDoeV1')
+        if not self.logger.handlers:
+            self.logger.setLevel(logging.INFO)
+            fmt = logging.Formatter('%(asctime)s [NAYDOEV1] %(levelname)s: %(message)s')
+            sh = logging.StreamHandler()
+            sh.setFormatter(fmt)
+            self.logger.addHandler(sh)
+            try:
+                fh = logging.FileHandler('/var/log/naydoev1.log')
+                fh.setFormatter(fmt)
+                self.logger.addHandler(fh)
+            except OSError:
+                pass
         
         self.print_banner()
     
@@ -73,112 +77,142 @@ class NayDoeV1Orchestrator:
         self.logger.info("NayDoeV1 Orchestrator initialized")
     
     def check_system_health(self):
-        """Check health of all system components"""
+        """Check health of all system components."""
         self.logger.info("🏥 Checking system health...")
-        
-        # Check Docker
+
+        # Docker
         try:
             result = subprocess.run(
                 ['docker', 'info'],
                 capture_output=True,
-                timeout=5
+                timeout=5,
             )
             self.components['docker']['status'] = 'running' if result.returncode == 0 else 'stopped'
-        except:
+        except Exception as e:
+            self.logger.debug(f"docker info check failed: {e}")
             self.components['docker']['status'] = 'stopped'
-        
-        # Check JessicAi
-        self.components['jessicai']['status'] = self.check_process('jessicai')
-        
-        # Check NAi_gAil
-        self.components['nai_gail']['status'] = self.check_process('nai-gail')
-        
-        # Check NiA_Vault
-        self.components['nia_vault']['status'] = self.check_process('nia-vault')
-        
-        # Check Rancher
+
+        # Process-managed components: check stored proc first, fall back to pgrep
+        _PROC_SEARCH = {
+            'jessicai': 'jessicai_huntress',
+            'nai_gail':  'mesh_shield',
+            'nia_vault': 'nia-vault',
+        }
+        for name, search_term in _PROC_SEARCH.items():
+            proc = self.components[name].get('proc')
+            if proc is not None and proc.poll() is None:
+                self.components[name]['status'] = 'running'
+            else:
+                self.components[name]['status'] = self.check_process(search_term)
+
+        # Rancher via Docker
         self.components['rancher']['status'] = self.check_docker_container('rancher')
-        
+
         return self.components
-    
+
     def check_process(self, name):
-        """Check if process is running"""
+        """Check if a process matching *name* is running."""
         try:
             result = subprocess.run(
                 ['pgrep', '-f', name],
                 capture_output=True,
-                timeout=5
+                timeout=5,
             )
             return 'running' if result.returncode == 0 else 'stopped'
-        except:
+        except Exception as e:
+            self.logger.debug(f"pgrep check failed for {name}: {e}")
             return 'unknown'
-    
-    def check_docker_container(self, name):
-        """Check if Docker container is running"""
+        """Check if a Docker container is running."""
         try:
             result = subprocess.run(
                 ['docker', 'ps', '--filter', f'name={name}', '--format', '{{.Names}}'],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             return 'running' if name in result.stdout else 'stopped'
-        except:
+        except Exception as e:
+            self.logger.debug(f"docker ps check failed for {name}: {e}")
             return 'unknown'
-    
-    def start_component(self, component_name):
-        """Start a system component"""
+        """Start a system component and store its handle for later management."""
         self.logger.info(f"🚀 Starting {component_name}...")
-        
+
+        # Python-process-based components – keyed by name to their script path
+        _PROCESS_MAP = {
+            'jessicai': '/opt/ai-systems/jessicai_huntress.py',
+            'nai_gail': '/opt/nai-gail/mesh_shield.py',
+            'nia_vault': '/opt/nia-vault/blockchain.py',
+        }
+
         try:
             if component_name == 'docker':
-                subprocess.run(['systemctl', 'start', 'docker'], timeout=10)
-            
-            elif component_name == 'jessicai':
-                subprocess.Popen(['python3', '/opt/ai-systems/jessicai_huntress.py'])
-            
-            elif component_name == 'nai_gail':
-                subprocess.Popen(['python3', '/opt/nai-gail/mesh_shield.py'])
-            
-            elif component_name == 'nia_vault':
-                subprocess.Popen(['python3', '/opt/nia-vault/blockchain.py'])
-            
+                subprocess.run(['systemctl', 'start', 'docker'], timeout=10, check=False)
+
+            elif component_name in _PROCESS_MAP:
+                # Terminate any previously stored process first
+                self._terminate_proc(component_name)
+                proc = subprocess.Popen(
+                    ['python3', _PROCESS_MAP[component_name]],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                self.components[component_name]['proc'] = proc
+
             elif component_name == 'rancher':
-                subprocess.run([
-                    'docker', 'run', '-d',
-                    '--name', 'rancher',
-                    '--restart=unless-stopped',
-                    '-p', '80:80',
-                    '-p', '443:443',
-                    '--privileged',
-                    'rancher/rancher:latest'
-                ], timeout=30)
-            
+                # Only start if not already running
+                if self.check_docker_container('rancher') != 'running':
+                    subprocess.run([
+                        'docker', 'run', '-d',
+                        '--name', 'rancher',
+                        '--restart=unless-stopped',
+                        '-p', '80:80',
+                        '-p', '443:443',
+                        '--privileged',
+                        'rancher/rancher:latest',
+                    ], timeout=30, check=False)
+
+            self.components[component_name]['status'] = 'running'
             self.logger.info(f"✅ {component_name} started")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to start {component_name}: {e}")
+            self.components[component_name]['status'] = 'stopped'
             return False
-    
+
+    def _terminate_proc(self, component_name):
+        """Terminate a stored subprocess if it is still alive."""
+        proc = self.components.get(component_name, {}).get('proc')
+        if proc is not None and proc.poll() is None:
+            try:
+                proc.terminate()
+                proc.wait(timeout=5)
+            except Exception:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+        self.components[component_name]['proc'] = None
+
     def stop_component(self, component_name):
-        """Stop a system component"""
+        """Stop a system component."""
         self.logger.info(f"⏹️  Stopping {component_name}...")
-        
+
         try:
             if component_name == 'docker':
-                subprocess.run(['systemctl', 'stop', 'docker'], timeout=10)
-            
-            elif component_name in ['jessicai', 'nai_gail', 'nia_vault']:
-                subprocess.run(['pkill', '-f', component_name], timeout=5)
-            
+                subprocess.run(['systemctl', 'stop', 'docker'], timeout=10, check=False)
+
+            elif component_name in ('jessicai', 'nai_gail', 'nia_vault'):
+                self._terminate_proc(component_name)
+
             elif component_name == 'rancher':
-                subprocess.run(['docker', 'stop', 'rancher'], timeout=30)
-                subprocess.run(['docker', 'rm', 'rancher'], timeout=10)
-            
+                subprocess.run(['docker', 'stop', 'rancher'], timeout=30, check=False)
+                subprocess.run(['docker', 'rm', 'rancher'], timeout=10, check=False)
+
+            self.components[component_name]['status'] = 'stopped'
             self.logger.info(f"✅ {component_name} stopped")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to stop {component_name}: {e}")
             return False
@@ -197,11 +231,9 @@ class NayDoeV1Orchestrator:
         health = self.check_system_health()
         
         for component, status in health.items():
-            if status['status'] == 'stopped' and component != 'docker':
+            if status['status'] == 'stopped':
                 self.logger.warning(f"⚠️  {component} is down, attempting restart...")
                 self.restart_component(component)
-                
-                # Learn from this
                 self.observe(f"{component}_failure")
                 self.decide(f"restart_{component}")
     
@@ -226,13 +258,16 @@ class NayDoeV1Orchestrator:
         })
     
     def save_observations(self):
-        """Save observations to file"""
-        with open('/var/log/naydoev1-observations.json', 'w') as f:
-            json.dump({
-                'observations': self.observations[-1000:],  # Keep last 1000
-                'decisions': self.decisions[-1000:],
-                'patterns': dict(self.patterns)
-            }, f, indent=2)
+        """Save observations to file."""
+        try:
+            with open('/var/log/naydoev1-observations.json', 'w') as f:
+                json.dump({
+                    'observations': self.observations[-1000:],
+                    'decisions': self.decisions[-1000:],
+                    'patterns': dict(self.patterns),
+                }, f, indent=2)
+        except OSError as exc:
+            self.logger.warning(f"Could not save observations: {exc}")
     
     def optimize_resources(self):
         """Optimize system resources"""
@@ -280,7 +315,8 @@ class NayDoeV1Orchestrator:
                 'used_mb': used,
                 'usage_percent': round((used / total) * 100, 1)
             }
-        except:
+        except Exception as e:
+            self.logger.debug(f"Memory info unavailable: {e}")
             return {'total_mb': 0, 'used_mb': 0, 'usage_percent': 0}
     
     def orchestrate(self):
