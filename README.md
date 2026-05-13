@@ -359,7 +359,52 @@ ufw status verbose
 - Access vault master key
 - Configure AI systems
 
----
+Implement the plan: 1. Define a single “system map” for the repo that documents active runtime components (`src/services/*`), legacy services (`services/*`), workflows, and deployment paths so the AI layer has a canonical software layout source.
+
+2. Build a “dataset-to-service registry” that links each dataset to:
+- owning service/module,
+- schema/location,
+- update cadence,
+- consuming programs,
+- validation rules.
+
+3. Stand up a “research-lab diagnostics pipeline” that centralizes errors from services and CI into one taxonomy (runtime, data, protocol, infra), with ownership and severity routing.
+
+4. Introduce protocol-governance rules for safe modifications:
+- versioned protocol specs,
+- compatibility checks,
+- rollback requirements,
+- mandatory validation gates before release.
+
+5. Add performance/effectiveness feedback loops:
+- baseline KPIs per service,
+- automated regression detection,
+- experiment tracking for protocol changes,
+- promotion only when metrics improve.
+
+6. Implement a controlled self-updater mechanism:
+- detect approved updates,
+- run staged validation (tests/security/health),
+- canary rollout,
+- automatic rollback on failure.
+
+7. Add AI knowledge refresh jobs that periodically ingest:
+- repo structure changes,
+- new datasets/schemas,
+- recent incidents and fixes,
+- protocol revisions,
+then regenerate internal knowledge indexes.
+
+8. Define operating policy and security boundaries for the updater:
+- signed artifacts only,
+- least-privilege execution,
+- immutable audit logs,
+- human approval for high-risk protocol/data changes.
+
+9. Create an execution roadmap in three increments:
+- Foundation: system map + registry + diagnostics.
+- Control: protocol governance + KPI loops.
+- Autonomy: self-updater + AI refresh + guarded rollout automation
 
 ## 📊 Monitoring & Logs
 
